@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.log
+*.fbx
+.agents/
+blender-skills/
+skills-lock.json
+preview*.png

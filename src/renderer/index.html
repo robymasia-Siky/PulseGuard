@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PulseGuard - PC Hardware Monitor</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app" class="app-container">
+        <!-- Custom Titlebar -->
+        <header class="titlebar">
+            <div class="titlebar-left">
+                <div class="logo-box">
+                    <span class="logo-pulse"></span>
+                    <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                    </svg>
+                </div>
+                <span class="app-title">PulseGuard <span class="app-sub">Hardware Monitor</span></span>
+            </div>
+
+            <!-- Tab Navigation in Titlebar -->
+            <nav class="titlebar-nav" id="main-nav">
+                <button class="nav-tab active" data-tab="tab-overview" title="Panoramica Hardware">
+                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    <span>Panoramica</span>
+                </button>
+                <button class="nav-tab" data-tab="tab-processes" title="Monitoraggio Processi">
+                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    <span>Processi</span>
+                </button>
+                <button class="nav-tab" data-tab="tab-specs" title="Specifiche Computer">
+                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    <span>Specifiche PC</span>
+                </button>
+                <button class="nav-tab" data-tab="tab-settings" title="Impostazioni">
+                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    <span>Impostazioni</span>
+                </button>
+            </nav>
+
+            <div class="titlebar-right">
+                <!-- Status badge -->
+                <div id="admin-badge" class="badge-status admin-active" title="Telemetria e sensori hardware attivi in tempo reale">
+                    <span class="badge-dot"></span>
+                    <span id="admin-badge-text">Monitoraggio Attivo</span>
+                </div>
+
+                <!-- Mini Mode Toggle -->
+                <button id="btn-mini-mode" class="window-btn btn-pill-mode" title="Passa al Mini Widget Desktop compatto (Scorciatoia: Ctrl+M o F11)">
+                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><rect x="4" y="4" width="16" height="16" rx="2"/><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/></svg>
+                    <span>Mini Widget HUD</span>
+                </button>
+
+                <!-- Always on Top Pin -->
+                <button id="btn-pin" class="window-btn" title="Blocca sempre in primo piano">
+                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14l-2-6V4a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7l-2 6z"/></svg>
+                </button>
+
+                <div class="window-divider"></div>
+
+                <!-- Window controls -->
+                <button id="btn-minimize" class="window-btn" title="Riduci a icona">&#x2014;</button>
+                <button id="btn-maximize" class="window-btn" title="Ingrandisci / Rimpicciolisci">&#9633;</button>
+                <button id="btn-close" class="window-btn close-btn" title="Chiudi">&#x2715;</button>
+            </div>
+        </header>
+
+        <!-- Mini Widget Overlay View (shown only in mini mode) -->
+        <div id="mini-widget" class="mini-widget-container" style="display: none;">
+            <div class="mini-widget-drag">
+                <div class="mini-logo-row">
+                    <span class="mini-logo-dot"></span>
+                    <span class="mini-title">PulseGuard</span>
+                </div>
+                <span class="mini-subtext">Desktop HUD</span>
+            </div>
+            <div class="mini-metrics">
+                <div class="mini-item">
+                    <span class="mini-label tag-cpu">CPU</span>
+                    <span id="mini-cpu-load" class="mini-val cyan">8%</span>
+                    <span id="mini-cpu-temp" class="mini-sub">39.4 °C</span>
+                </div>
+                <div class="mini-item">
+                    <span class="mini-label tag-gpu">GPU</span>
+                    <span id="mini-gpu-load" class="mini-val green">7%</span>
+                    <span id="mini-gpu-temp" class="mini-sub">44.0 °C</span>
+                </div>
+                <div class="mini-item">
+                    <span class="mini-label tag-ram">RAM</span>
+                    <span id="mini-ram-load" class="mini-val purple">36%</span>
+                    <span id="mini-ram-val" class="mini-sub">11.6 GB</span>
+                </div>
+            </div>
+            <div class="mini-actions">
+                <button id="btn-restore-full" class="mini-btn" title="Ripristina Finestra Completa (Ctrl+M o F11)">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                </button>
+                <button id="btn-mini-close" class="mini-btn mini-close-btn" title="Chiudi PulseGuard">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <main class="main-content" id="main-content">
+
+            <!-- TAB 1: PANORAMICA (OVERVIEW) -->
+            <section id="tab-overview" class="tab-page active">
+                
+                <!-- Hero Cards (4 Cards: CPU, GPU, RAM, Disks) -->
+                <div class="grid-cards">
+                    
+                    <!-- CPU Card -->
+                    <div class="card card-cpu">
+                        <div class="card-header">
+                            <div class="card-title-group">
+                                <span class="tag tag-cpu">CPU</span>
+                                <h3 id="cpu-name" class="card-title">AMD Ryzen 7 5700X</h3>
+                            </div>
+                            <span id="cpu-temp-badge" class="badge-temp">39.4 °C</span>
+                        </div>
+                        <div class="card-body gauge-row">
+                            <div class="gauge-box">
+                                <svg class="gauge-svg" viewBox="0 0 100 100">
+                                    <circle class="gauge-bg" cx="50" cy="50" r="42" />
+                                    <circle id="gauge-cpu" class="gauge-fill cyan-stroke" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="242" />
+                                </svg>
+                                <div class="gauge-inner">
+                                    <span id="cpu-load-val" class="gauge-value">8%</span>
+                                    <span class="gauge-label">Carico CPU</span>
+                                </div>
+                            </div>
+                            <div class="card-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Temperatura:</span>
+                                    <span id="cpu-temp-val" class="stat-val highlight">39.4 °C</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Potenza Package:</span>
+                                    <span id="cpu-power-val" class="stat-val">21.8 W</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Tensione Core:</span>
+                                    <span id="cpu-voltage-val" class="stat-val">1.25 V</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Core / Thread:</span>
+                                    <span id="cpu-cores-val" class="stat-val">8 Core / 16 Thread</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- GPU Card -->
+                    <div class="card card-gpu">
+                        <div class="card-header">
+                            <div class="card-title-group">
+                                <span class="tag tag-gpu">GPU</span>
+                                <h3 id="gpu-name" class="card-title">NVIDIA GeForce RTX 4060</h3>
+                            </div>
+                            <span id="gpu-temp-badge" class="badge-temp green-badge">44.0 °C</span>
+                        </div>
+                        <div class="card-body gauge-row">
+                            <div class="gauge-box">
+                                <svg class="gauge-svg" viewBox="0 0 100 100">
+                                    <circle class="gauge-bg" cx="50" cy="50" r="42" />
+                                    <circle id="gauge-gpu" class="gauge-fill green-stroke" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="245" />
+                                </svg>
+                                <div class="gauge-inner">
+                                    <span id="gpu-load-val" class="gauge-value">7%</span>
+                                    <span class="gauge-label">Utilizzo GPU</span>
+                                </div>
+                            </div>
+                            <div class="card-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Temp Hot Spot:</span>
+                                    <span id="gpu-hotspot-val" class="stat-val highlight-green">50.8 °C</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Ventola GPU:</span>
+                                    <span id="gpu-fan-val" class="stat-val">0% (0 RPM)</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Clock Core / Mem:</span>
+                                    <span id="gpu-clocks-val" class="stat-val">2460 / 8501 MHz</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">VRAM Utilizzata:</span>
+                                    <span id="gpu-vram-text" class="stat-val">1.6 / 8.0 GB (20%)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RAM Card -->
+                    <div class="card card-ram">
+                        <div class="card-header">
+                            <div class="card-title-group">
+                                <span class="tag tag-ram">RAM</span>
+                                <h3 class="card-title">Memoria di Sistema</h3>
+                            </div>
+                            <span id="ram-used-badge" class="badge-temp purple-badge">11.6 GB</span>
+                        </div>
+                        <div class="card-body gauge-row">
+                            <div class="gauge-box">
+                                <svg class="gauge-svg" viewBox="0 0 100 100">
+                                    <circle class="gauge-bg" cx="50" cy="50" r="42" />
+                                    <circle id="gauge-ram" class="gauge-fill purple-stroke" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="168" />
+                                </svg>
+                                <div class="gauge-inner">
+                                    <span id="ram-load-val" class="gauge-value">36%</span>
+                                    <span class="gauge-label">Utilizzo RAM</span>
+                                </div>
+                            </div>
+                            <div class="card-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">RAM Totale:</span>
+                                    <span id="ram-total-val" class="stat-val">32.0 GB</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">RAM Disponibile:</span>
+                                    <span id="ram-free-val" class="stat-val highlight-purple">20.4 GB</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Memoria Virtuale:</span>
+                                    <span id="ram-virtual-val" class="stat-val">17.8 GB</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Swap / Paging:</span>
+                                    <span id="ram-swap-val" class="stat-val">Attivo</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Network Card -->
+                    <div class="card card-net">
+                        <div class="card-header">
+                            <div class="card-title-group">
+                                <span class="tag tag-net">RETE</span>
+                                <h3 id="net-iface-name" class="card-title">Wi-Fi (Realtek 8821CU)</h3>
+                            </div>
+                            <span class="badge-temp blue-badge">Online</span>
+                        </div>
+                        <div class="card-body net-body">
+                            <div class="net-speeds">
+                                <div class="net-speed-item">
+                                    <div class="net-icon down-icon">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+                                    </div>
+                                    <div class="net-speed-data">
+                                        <span class="net-speed-label">Download</span>
+                                        <span id="net-down-val" class="net-speed-value">0.0 KB/s</span>
+                                    </div>
+                                </div>
+                                <div class="net-speed-item">
+                                    <div class="net-icon up-icon">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                                    </div>
+                                    <div class="net-speed-data">
+                                        <span class="net-speed-label">Upload</span>
+                                        <span id="net-up-val" class="net-speed-value">0.0 KB/s</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="net-totals">
+                                <div class="stat-item">
+                                    <span class="stat-label">Ricevuti Totali:</span>
+                                    <span id="net-total-rx" class="stat-val highlight-blue">2.17 GB</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Inviati Totali:</span>
+                                    <span id="net-total-tx" class="stat-val highlight-blue">0.39 GB</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Middle Section: Multi-Core Ryzen Matrix + GPU VRAM & Storage -->
+                <div class="grid-middle">
+                    
+                    <!-- Ryzen 16-Core Matrix -->
+                    <div class="card card-cores">
+                        <div class="card-header">
+                            <h4 class="section-title">
+                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/></svg>
+                                Matrice Thread CPU (16 Thread Logici)
+                            </h4>
+                            <span class="hint-label">Carico in tempo reale per Core</span>
+                        </div>
+                        <div class="cores-grid" id="cores-container">
+                            <!-- Populated dynamically via JS: 16 core bars -->
+                        </div>
+                    </div>
+
+                    <!-- Storage & VRAM breakdown -->
+                    <div class="card card-storage-vram">
+                        <div class="card-header">
+                            <h4 class="section-title">
+                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                                Dischi & Memoria Video VRAM
+                            </h4>
+                        </div>
+                        <div class="storage-vram-body">
+                            <!-- VRAM Progress -->
+                            <div class="vram-section">
+                                <div class="bar-header">
+                                    <span class="bar-title">VRAM Dedicata (RTX 4060)</span>
+                                    <span id="vram-bar-text" class="bar-val">1.6 / 8.0 GB (20%)</span>
+                                </div>
+                                <div class="progress-track">
+                                    <div id="vram-progress" class="progress-fill green-fill" style="width: 20%;"></div>
+                                </div>
+                            </div>
+
+                            <!-- Drives Container -->
+                            <div class="drives-list" id="drives-container">
+                                <!-- Populated dynamically (C:, E:, etc.) -->
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Live Sparkline History Graphs (Canvas-based) -->
+                <div class="card card-charts">
+                    <div class="card-header">
+                        <div class="chart-header-left">
+                            <h4 class="section-title">
+                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                                Storico Carico & Temperature (Ultimi 60 secondi)
+                            </h4>
+                        </div>
+                        <div class="chart-legend">
+                            <span class="legend-item"><span class="legend-dot cyan"></span> CPU Load %</span>
+                            <span class="legend-item"><span class="legend-dot green"></span> GPU Load %</span>
+                            <span class="legend-item"><span class="legend-dot amber"></span> GPU Temp °C</span>
+                        </div>
+                    </div>
+                    <div class="chart-canvas-box">
+                        <canvas id="history-chart" width="1050" height="180"></canvas>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- TAB 2: PROCESSI (TASK MANAGER) -->
+            <section id="tab-processes" class="tab-page">
+                <div class="card proc-card">
+                    <div class="card-header proc-header">
+                        <div class="proc-title-group">
+                            <h3 class="section-title">Monitoraggio Processi Attivi</h3>
+                            <span class="hint-label">Visualizza e gestisci le applicazioni che consumano CPU e RAM</span>
+                        </div>
+                        <div class="proc-controls">
+                            <div class="search-box">
+                                <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                <input type="text" id="proc-search" placeholder="Filtra processi per nome o PID...">
+                            </div>
+                            <button id="btn-refresh-procs" class="btn-action" title="Aggiorna lista processi">
+                                <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                                Aggiorna
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="proc-table-wrapper">
+                        <table class="proc-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 35%;">Nome Applicazione</th>
+                                    <th style="width: 15%;">PID</th>
+                                    <th style="width: 20%;" class="sortable" id="sort-cpu">Carico CPU % &#9662;</th>
+                                    <th style="width: 20%;" class="sortable" id="sort-mem">Memoria RAM (MB)</th>
+                                    <th style="width: 10%; text-align: right;">Azione</th>
+                                </tr>
+                            </thead>
+                            <tbody id="proc-tbody">
+                                <tr>
+                                    <td colspan="5" class="loading-td">Caricamento processi in corso...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: SPECIFICHE HARDWARE (SPECS) -->
+            <section id="tab-specs" class="tab-page">
+                <div class="specs-grid">
+                    
+                    <div class="spec-card">
+                        <div class="spec-header">
+                            <div class="spec-icon cyan-icon">
+                                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/></svg>
+                            </div>
+                            <div>
+                                <h4 class="spec-title">Processore (CPU)</h4>
+                                <span class="spec-sub">Architettura & Dettagli Microprocessore</span>
+                            </div>
+                        </div>
+                        <div class="spec-list">
+                            <div class="spec-row"><span class="spec-k">Modello:</span><span id="spec-cpu-brand" class="spec-v">AMD Ryzen 7 5700X 8-Core Processor</span></div>
+                            <div class="spec-row"><span class="spec-k">Core Fisici:</span><span id="spec-cpu-cores" class="spec-v">8 Core fisici</span></div>
+                            <div class="spec-row"><span class="spec-k">Core Logici (Thread):</span><span id="spec-cpu-threads" class="spec-v">16 Thread logici</span></div>
+                            <div class="spec-row"><span class="spec-k">Frequenza Base:</span><span id="spec-cpu-speed" class="spec-v">3.4 GHz (Boost 4.6 GHz)</span></div>
+                            <div class="spec-row"><span class="spec-k">Socket:</span><span id="spec-cpu-socket" class="spec-v">AM4</span></div>
+                        </div>
+                    </div>
+
+                    <div class="spec-card">
+                        <div class="spec-header">
+                            <div class="spec-icon green-icon">
+                                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                            </div>
+                            <div>
+                                <h4 class="spec-title">Scheda Video (GPU)</h4>
+                                <span class="spec-sub">Acceleratore Grafico Dedicato</span>
+                            </div>
+                        </div>
+                        <div class="spec-list">
+                            <div class="spec-row"><span class="spec-k">Modello:</span><span id="spec-gpu-model" class="spec-v">NVIDIA GeForce RTX 4060</span></div>
+                            <div class="spec-row"><span class="spec-k">VRAM Dedicata:</span><span id="spec-gpu-vram" class="spec-v">8188 MB (8 GB GDDR6)</span></div>
+                            <div class="spec-row"><span class="spec-k">Driver:</span><span id="spec-gpu-driver" class="spec-v">Aggiornato</span></div>
+                            <div class="spec-row"><span class="spec-k">Supporto DirectX:</span><span class="spec-v">DirectX 12 Ultimate</span></div>
+                        </div>
+                    </div>
+
+                    <div class="spec-card">
+                        <div class="spec-header">
+                            <div class="spec-icon purple-icon">
+                                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="7" width="20" height="10" rx="2"/><line x1="6" y1="17" x2="6" y2="20"/><line x1="10" y1="17" x2="10" y2="20"/><line x1="14" y1="17" x2="14" y2="20"/><line x1="18" y1="17" x2="18" y2="20"/></svg>
+                            </div>
+                            <div>
+                                <h4 class="spec-title">Memoria & Scheda Madre</h4>
+                                <span class="spec-sub">Piattaforma Hardware Principale</span>
+                            </div>
+                        </div>
+                        <div class="spec-list">
+                            <div class="spec-row"><span class="spec-k">Produttore MoBo:</span><span id="spec-mb-vendor" class="spec-v">ASRock</span></div>
+                            <div class="spec-row"><span class="spec-k">Modello MoBo:</span><span id="spec-mb-model" class="spec-v">A520M-HVS</span></div>
+                            <div class="spec-row"><span class="spec-k">BIOS:</span><span id="spec-mb-bios" class="spec-v">UEFI</span></div>
+                            <div class="spec-row"><span class="spec-k">Capacità RAM:</span><span id="spec-ram-cap" class="spec-v">32 GB DDR4</span></div>
+                        </div>
+                    </div>
+
+                    <div class="spec-card">
+                        <div class="spec-header">
+                            <div class="spec-icon amber-icon">
+                                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M12 4v16M4 12h16"/></svg>
+                            </div>
+                            <div>
+                                <h4 class="spec-title">Sistema Operativo</h4>
+                                <span class="spec-sub">Ambiente Software & Stato Sessione</span>
+                            </div>
+                        </div>
+                        <div class="spec-list">
+                            <div class="spec-row"><span class="spec-k">Edizione:</span><span id="spec-os-name" class="spec-v">Microsoft Windows 11 Pro</span></div>
+                            <div class="spec-row"><span class="spec-k">Versione & Build:</span><span id="spec-os-build" class="spec-v">25H2 (Build 26200)</span></div>
+                            <div class="spec-row"><span class="spec-k">Architettura:</span><span id="spec-os-arch" class="spec-v">x64 (64-bit)</span></div>
+                            <div class="spec-row"><span class="spec-k">Nome Computer:</span><span id="spec-os-host" class="spec-v">DESKTOP</span></div>
+                            <div class="spec-row"><span class="spec-k">Tempo di Attività (Uptime):</span><span id="spec-uptime" class="spec-v">--</span></div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- TAB 4: IMPOSTAZIONI & UTILITY -->
+            <section id="tab-settings" class="tab-page">
+                <div class="settings-container">
+                    <div class="card settings-card">
+                        <h3 class="section-title">Preferenze di Monitoraggio</h3>
+                        
+                        <div class="setting-item">
+                            <div class="setting-desc">
+                                <span class="setting-title">Frequenza di aggiornamento telemetria</span>
+                                <span class="setting-sub">Intervallo di lettura e campionamento dei sensori hardware</span>
+                            </div>
+                            <select id="setting-interval" class="select-box">
+                                <option value="500">500 ms (Ultra reattivo)</option>
+                                <option value="1000" selected>1000 ms (Consigliato standard)</option>
+                                <option value="2000">2000 ms (Modalità eco / basso consumo)</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="setting-desc">
+                                <span class="setting-title">Unità di Misura Temperatura</span>
+                                <span class="setting-sub">Scegli tra gradi Celsius (°C) o Fahrenheit (°F)</span>
+                            </div>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="tempUnit" value="C" checked> Celsius (°C)
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="tempUnit" value="F"> Fahrenheit (°F)
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="setting-desc">
+                                <span class="setting-title">Avviso Termico di Sicurezza</span>
+                                <span class="setting-sub">Evidenzia visivamente quando CPU o GPU superano la soglia critica</span>
+                            </div>
+                            <div class="threshold-input">
+                                <input type="number" id="setting-threshold" min="60" max="100" value="82" class="num-box">
+                                <span class="unit">°C</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card settings-card">
+                        <h3 class="section-title">Stato Telemetria Hardware</h3>
+                        
+                        <div class="setting-item">
+                            <div class="setting-desc">
+                                <span class="setting-title">Stato Sensori Hardware</span>
+                                <span class="setting-sub">Sensori CPU, GPU NVIDIA, RAM e Dischi NVMe connessi e sincronizzati in tempo reale.</span>
+                            </div>
+                            <span class="badge-temp green-badge">● Online & Sincronizzato</span>
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="setting-desc">
+                                <span class="setting-title">Modalità Mini Widget HUD</span>
+                                <span class="setting-sub">Puoi alternare rapidamente tra la finestra completa e il mini widget galleggiante premendo <code>F11</code> o <code>Ctrl+M</code>.</span>
+                            </div>
+                            <span class="shortcut-tip">Scorciatoia attiva: <code>F11</code> / <code>Ctrl + M</code></span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer / Statusbar -->
+        <footer class="statusbar">
+            <div class="status-left">
+                <span class="status-dot"></span>
+                <span id="footer-status-text">Telemetria attiva &bull; Connesso ai sensori hardware</span>
+            </div>
+            <div class="status-right">
+                <span id="footer-uptime">Uptime: --</span>
+                <span class="status-sep">|</span>
+                <span id="footer-rate">Aggiornamento: 1000ms</span>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="charts.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
